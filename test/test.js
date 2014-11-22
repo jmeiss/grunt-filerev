@@ -48,7 +48,7 @@ it('should use same revision as .js source for the .map', function () {
 
 it('should point the .js sourceMappingURL to the revisioned .map', function() {
   var file = 'test/fixtures/math.js';
-  var map = path.basename(hashes[file] + '.map');
+  var map = 'math.2f56179e.js.map';
   var revisioned = fs.readFileSync(hashes[file], {encoding: 'utf8'});
   assert(revisioned.indexOf('//# sourceMappingURL=' + map) !== -1);
 });
