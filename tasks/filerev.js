@@ -63,13 +63,25 @@ module.exports = function (grunt) {
         var sourceMap = false;
         if (ext === '.js' || ext === '.css') {
             var map = file + '.map';
-            resultPath += '.map';
+            var resultPathMap = resultPath + '.map';
             if (grunt.file.exists(map)) {
                 if (move) {
-                    fs.renameSync(map, resultPath);
+                    fs.renameSync(map, resultPathMap);
                 } else {
-                    grunt.file.copy(map, resultPath);
+                    grunt.file.copy(map, resultPathMap);
                 }
+
+                // rename sourceMappingUrl in file
+                var jsFileContents = grunt.file.read(resultPath, { encoding: 'utf-8' });
+                var newSrcMapUrl = jsFileContents.replace(/(\/\/#\s+sourceMappingURL=)([\w\.]*.js.map)/g, '$1' + path.basename(resultPath) + '.map');
+
+                // update file reference inside source map file
+                var mapFileContents = grunt.file.readJSON(resultPathMap, { encoding: 'utf-8' });
+                mapFileContents.file = path.basename(resultPath) + '.map';
+
+                // write files
+                grunt.file.write(resultPath, newSrcMapUrl, { encoding: 'utf-8' });
+                grunt.file.write(resultPathMap, JSON.stringify(mapFileContents), { encoding: 'utf-8' });
                 sourceMap = true;
            }
         }
