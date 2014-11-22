@@ -1,5 +1,6 @@
 'use strict';
 var fs = require('fs');
+var path = require('path');
 var assert = require('assert');
 
 var hashes = {
@@ -40,8 +41,8 @@ it('should allow sources defined with expand', function () {
 
 it('should use same revision as .js source for the .map', function () {
   var file = 'test/fixtures/math.js.map';
-  var original = fs.statSync(file).size;
-  var revisioned = fs.statSync(hashes[file]).size;
+  var original = path.basename(hashes[file]);
+  var revisioned = path.basename(hashes[file] + '.map', '.map');
   assert(revisioned === original);
 });
 
