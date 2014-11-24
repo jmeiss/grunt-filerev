@@ -72,15 +72,15 @@ module.exports = function (grunt) {
                 }
 
                 // rewrite the sourceMappingURL in files
-                var fileContents = grunt.file.read(resultPath, {encoding: 'utf8'});
+                var fileContents = grunt.file.read(resultPath);
                 var newSrcMap = fileContents.replace('//# sourceMappingURL=' + path.basename(file) + '.map', '//# sourceMappingURL=' + path.basename(resultPathMap));
                 // update file reference inside source map file
-                var mapFileContents = grunt.file.readJSON(resultPathMap, { encoding: 'utf-8' });
+                var mapFileContents = grunt.file.readJSON(resultPathMap);
                 mapFileContents.file = path.basename(resultPath) + '.map';
 
                 // write files
-                grunt.file.write(resultPath, newSrcMap, {encoding: 'utf8'});
-                grunt.file.write(resultPathMap, JSON.stringify(mapFileContents), { encoding: 'utf-8' });
+                grunt.file.write(resultPath, newSrcMap);
+                grunt.file.write(resultPathMap, JSON.stringify(mapFileContents));
                 sourceMap = true;
            }
         }
