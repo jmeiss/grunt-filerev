@@ -64,23 +64,31 @@ module.exports = function (grunt) {
         if (ext === '.js' || ext === '.css') {
           var map = file + '.map';
           var resultPathMap = resultPath + '.map';
+          var fileContents = grunt.file.read(resultPath);
+          var srcMapRegex = /(sourceMappingURL\=)([\w\-\/\.]+(?![\b\w\.]+[\.js|\.css]\.map)\/)?([\w\.\-]+\b\w+[\.js|\.css]\.map)/gi;
+          var regexResult;
+          var srcRelativePath;
+          var srcRelativePathExists;
 
-          if (grunt.file.exists(map)) {
-            var fileContents = grunt.file.read(resultPath);
-            var srcMapRegex = /(sourceMappingURL\=)([\w\-\/\.]+(?![\b\w\.]+[\.js|\.css]\.map)\/)?([\w\.\-]+\b\w+[\.js|\.css]\.map)/gi;
-            var regexResult = srcMapRegex.exec(fileContents);
-            var srcRelativePath = path.dirname(resultPath) + '/' + regexResult[2] + regexResult[3];
+          try {
+            regexResult = srcMapRegex.exec(fileContents);
+            srcRelativePath = path.dirname(resultPath) + '/' + regexResult[2] + regexResult[3];
+            srcRelativePathExists = true;
+          } catch (err) {
+            srcRelativePathExists = false;
+          }
 
+          if (grunt.file.exists(map) || srcRelativePathExists) {
             if (move) {
-                try {
-                  fs.renameSync(map, resultPathMap);
-                } catch (err) {
-                  // if map is not in the same directory, must be relative path
-                  grunt.verbose.writeln('Source Map not found in: ' + map);
-                  grunt.verbose.writeln('Trying Relative Path: : ' + srcRelativePath);
-                  resultPathMap = srcRelativePath;
-                  fs.renameSync(srcRelativePath, srcRelativePath);
-                }
+              try {
+                fs.renameSync(map, resultPathMap);
+              } catch (err) {
+                // if map is not in the same directory, must be relative path
+                grunt.verbose.writeln('Source Map not found in: ' + map);
+                grunt.verbose.writeln('Trying Relative Path: : ' + srcRelativePath);
+                resultPathMap = srcRelativePath;
+                fs.renameSync(srcRelativePath, srcRelativePath);
+              }
             } else {
               grunt.file.copy(map, resultPathMap);
             }
