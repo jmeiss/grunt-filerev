@@ -67,7 +67,7 @@ module.exports = function (grunt) {
 
           if (grunt.file.exists(map)) {
             var fileContents = grunt.file.read(resultPath);
-            var srcMapRegex = /(sourceMappingURL\=)([\w\-\/\.]+(?![\b\w\.]+[\.js|\.css]\.map)\/)?([\w\.]+\b\w+[\.js|\.css]\.map)/gi;
+            var srcMapRegex = /(sourceMappingURL\=)([\w\-\/\.]+(?![\b\w\.]+[\.js|\.css]\.map)\/)?([\w\.\-]+\b\w+[\.js|\.css]\.map)/gi;
             var regexResult = srcMapRegex.exec(fileContents);
             var srcRelativePath = path.dirname(resultPath) + '/' + regexResult[2] + regexResult[3];
 
