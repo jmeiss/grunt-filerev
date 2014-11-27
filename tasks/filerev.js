@@ -64,23 +64,38 @@ module.exports = function (grunt) {
         if (ext === '.js' || ext === '.css') {
             var map = file + '.map';
             var resultPathMap = resultPath + '.map';
+
             if (grunt.file.exists(map)) {
+                var fileContents = grunt.file.read(resultPath);
+                var srcMapRegex = /(sourceMappingURL\=)([\w\-\/\.]+(?![\b\w\.]+[\.js|\.css]\.map)\/)?([\w\.]+\b\w+[\.js|\.css]\.map)/gi;
+                var regexResult = srcMapRegex.exec(fileContents);
+                var srcRelativePath = path.dirname(resultPath) + '/' + regexResult[2] + regexResult[3];
+
                 if (move) {
-                    fs.renameSync(map, resultPathMap);
+                    try {
+                        fs.renameSync(map, resultPathMap);
+                    } catch (err) {
+                        // if map is not in the same directory, must be relative path
+                        grunt.verbose.writeln('Source Map not found in: ' + map);
+                        grunt.verbose.writeln('Trying Relative Path: : ' + srcRelativePath);
+                        resultPathMap = srcRelativePath;
+                        fs.renameSync(srcRelativePath, srcRelativePath);
+                    }
                 } else {
                     grunt.file.copy(map, resultPathMap);
                 }
 
                 // rewrite the sourceMappingURL in files
-                var fileContents = grunt.file.read(resultPath);
-                var newSrcMap = fileContents.replace('//# sourceMappingURL=' + path.basename(file) + '.map', '//# sourceMappingURL=' + path.basename(resultPathMap));
+                var newSrcMapUrl = fileContents.replace(srcMapRegex, '$1' + ('$2' || '') + path.basename(resultPath) + '.map');
                 // update file reference inside source map file
-                var mapFileContents = grunt.file.readJSON(resultPathMap);
-                mapFileContents.file = path.basename(resultPath) + '.map';
+                var srcFileReference = grunt.file.readJSON(resultPathMap);
+                srcFileReference.file = path.basename(resultPath);
 
-                // write files
-                grunt.file.write(resultPath, newSrcMap);
-                grunt.file.write(resultPathMap, JSON.stringify(mapFileContents));
+                if (grunt.file.exists(srcRelativePath)) {
+                    grunt.file.delete(srcRelativePath);
+                }
+                grunt.file.write(resultPath, newSrcMapUrl);
+                grunt.file.write(path.dirname(srcRelativePath) + '/' +  path.basename(resultPath) + '.map', JSON.stringify(srcFileReference));
                 sourceMap = true;
            }
         }
