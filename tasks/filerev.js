@@ -62,49 +62,49 @@ module.exports = function (grunt) {
         // Source maps
         var sourceMap = false;
         if (ext === '.js' || ext === '.css') {
-            var map = file + '.map';
-            var resultPathMap = resultPath + '.map';
+          var map = file + '.map';
+          var resultPathMap = resultPath + '.map';
 
-            if (grunt.file.exists(map)) {
-                var fileContents = grunt.file.read(resultPath);
-                var srcMapRegex = /(sourceMappingURL\=)([\w\-\/\.]+(?![\b\w\.]+[\.js|\.css]\.map)\/)?([\w\.]+\b\w+[\.js|\.css]\.map)/gi;
-                var regexResult = srcMapRegex.exec(fileContents);
-                var srcRelativePath = path.dirname(resultPath) + '/' + regexResult[2] + regexResult[3];
+          if (grunt.file.exists(map)) {
+            var fileContents = grunt.file.read(resultPath);
+            var srcMapRegex = /(sourceMappingURL\=)([\w\-\/\.]+(?![\b\w\.]+[\.js|\.css]\.map)\/)?([\w\.]+\b\w+[\.js|\.css]\.map)/gi;
+            var regexResult = srcMapRegex.exec(fileContents);
+            var srcRelativePath = path.dirname(resultPath) + '/' + regexResult[2] + regexResult[3];
 
-                if (move) {
-                    try {
-                        fs.renameSync(map, resultPathMap);
-                    } catch (err) {
-                        // if map is not in the same directory, must be relative path
-                        grunt.verbose.writeln('Source Map not found in: ' + map);
-                        grunt.verbose.writeln('Trying Relative Path: : ' + srcRelativePath);
-                        resultPathMap = srcRelativePath;
-                        fs.renameSync(srcRelativePath, srcRelativePath);
-                    }
-                } else {
-                    grunt.file.copy(map, resultPathMap);
+            if (move) {
+                try {
+                  fs.renameSync(map, resultPathMap);
+                } catch (err) {
+                  // if map is not in the same directory, must be relative path
+                  grunt.verbose.writeln('Source Map not found in: ' + map);
+                  grunt.verbose.writeln('Trying Relative Path: : ' + srcRelativePath);
+                  resultPathMap = srcRelativePath;
+                  fs.renameSync(srcRelativePath, srcRelativePath);
                 }
+            } else {
+              grunt.file.copy(map, resultPathMap);
+            }
 
-                // rewrite the sourceMappingURL in files
-                var newSrcMapUrl = fileContents.replace(srcMapRegex, '$1' + ('$2' || '') + path.basename(resultPath) + '.map');
-                // update file reference inside source map file
-                var srcFileReference = grunt.file.readJSON(resultPathMap);
-                srcFileReference.file = path.basename(resultPath);
+            // rewrite the sourceMappingURL in files
+            var newSrcMapUrl = fileContents.replace(srcMapRegex, '$1' + ('$2' || '') + path.basename(resultPath) + '.map');
+            // update file reference inside source map file
+            var srcFileReference = grunt.file.readJSON(resultPathMap);
+            srcFileReference.file = path.basename(resultPath);
 
-                if (grunt.file.exists(srcRelativePath)) {
-                    grunt.file.delete(srcRelativePath);
-                }
-                grunt.file.write(resultPath, newSrcMapUrl);
-                grunt.file.write(path.dirname(srcRelativePath) + '/' +  path.basename(resultPath) + '.map', JSON.stringify(srcFileReference));
-                sourceMap = true;
-           }
+            if (grunt.file.exists(srcRelativePath)) {
+              grunt.file.delete(srcRelativePath);
+            }
+            grunt.file.write(resultPath, newSrcMapUrl);
+            grunt.file.write(path.dirname(srcRelativePath) + '/' +  path.basename(resultPath) + '.map', JSON.stringify(srcFileReference));
+            sourceMap = true;
+          }
         }
 
         filerev.summary[path.normalize(file)] = path.join(dirname, newName);
         grunt.verbose.writeln(chalk.green('✔ ') + file + chalk.gray(' changed to ') + newName);
         if (sourceMap) {
-            filerev.summary[path.normalize(file + '.map')] = path.join(dirname, newName + '.map');
-            grunt.verbose.writeln(chalk.green('✔ ') + file + '.map' + chalk.gray(' changed to ') + newName + '.map');
+          filerev.summary[path.normalize(file + '.map')] = path.join(dirname, newName + '.map');
+          grunt.verbose.writeln(chalk.green('✔ ') + file + '.map' + chalk.gray(' changed to ') + newName + '.map');
         }
 
       });
