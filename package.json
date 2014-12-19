@@ -1,6 +1,6 @@
 {
   "name": "grunt-filerev",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Asset revisioning by using file content hashing",
   "keywords": [
     "gruntplugin",
@@ -15,7 +15,7 @@
     "email": "frederick.ros@gmail.com",
     "url": "https://github.com/sleeper"
   },
-  "repository": "yeoman/grunt-filerev",
+  "repository": "jmeiss/grunt-filerev",
   "scripts": {
     "test": "grunt"
   },
